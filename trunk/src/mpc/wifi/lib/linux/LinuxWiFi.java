@@ -7,10 +7,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 import mpc.wifi.lib.SignalStrength;
+import mpc.wifi.lib.WiFiInfo;
 
 
-
-public class WiFiInfo {
+/**
+ * Wrapper of the iwlist command
+ */
+public class LinuxWiFi implements WiFiInfo{
 	
 	/**
 	 * Change to "" to avoid giving super user privileges to this application.
@@ -20,15 +23,15 @@ public class WiFiInfo {
 	
 	private String wifi_interface = "ra0";
 
-	public WiFiInfo() {
+	public LinuxWiFi() {
 	}
 	
-	public WiFiInfo(String wifi_interface) {
+	public LinuxWiFi(String wifi_interface) {
 		this.wifi_interface = wifi_interface;
 	}
 	
 
-	public List<SignalStrength> scan() throws IOException, InterruptedException {
+	public List<SignalStrength> scan() throws IOException {
 		Process p = Runtime.getRuntime().exec(SU_PRIVILEGES +" "+ "iwlist "+ wifi_interface +" ap");
 		
 		InputStream is = p.getInputStream();
@@ -85,7 +88,7 @@ public class WiFiInfo {
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		WiFiInfo wi = new WiFiInfo();
+		LinuxWiFi wi = new LinuxWiFi();
 		
 		for(SignalStrength ss : wi.scan())
 			System.out.printf("Access Point %s\t%d\n", ss.getBssid(), ss.getSignal());
