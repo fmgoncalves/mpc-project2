@@ -41,31 +41,35 @@ public class LocateMe extends JFrame {
 
 			@Override
 			public void run() {
+				while (true) {
+					try {
 
-				try {
-					String location = lp.guessLocation(wifinfo.scan());
-					System.out.println("guessed "+location);
-					resultPanel.removeAll();
-					
-					JTextArea jta;
-					if(!location.isEmpty())
-						jta = new JTextArea("You are at: " + location);
-					else jta = new JTextArea("Couldn't determine current location");
-					jta.setEditable(false);
-					resultPanel.add(jta);
-					
-					resultPanel.updateUI();
+						String location = lp.guessLocation(wifinfo.scan());
+						System.out.println("guessed " + location);
+						resultPanel.removeAll();
 
-				} catch (DatabaseError e1) {
-					e1.printStackTrace();
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
+						JTextArea jta;
+						if (!location.isEmpty())
+							jta = new JTextArea("You are at: " + location);
+						else
+							jta = new JTextArea(
+									"Couldn't determine current location");
+						jta.setEditable(false);
+						resultPanel.add(jta);
 
-				try {
-					Thread.sleep(15000);
-				} catch (InterruptedException e) {
-					System.err.println(e.getLocalizedMessage());
+						resultPanel.updateUI();
+
+					} catch (DatabaseError e1) {
+						e1.printStackTrace();
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+
+					try {
+						Thread.sleep(15000);
+					} catch (InterruptedException e) {
+						System.err.println(e.getLocalizedMessage());
+					}
 				}
 			}
 		}).start();
@@ -77,7 +81,7 @@ public class LocateMe extends JFrame {
 		add(resultPanel, BorderLayout.CENTER);
 
 		setSize(200, 400);
-		
+
 		setVisible(true);
 
 	}
