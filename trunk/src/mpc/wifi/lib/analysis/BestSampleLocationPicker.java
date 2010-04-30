@@ -36,7 +36,7 @@ public class BestSampleLocationPicker implements LocationPicker {
 	}
 
 	@Override
-	public String guessLocation(List<SignalStrength> sample) {
+	public String guessLocation(List<SignalStrength> sample) throws DatabaseError {
 		double best = Double.MAX_VALUE;
 		
 		//valor de bestKey não interessa, é só porque precisa ser inicializada
@@ -49,14 +49,19 @@ public class BestSampleLocationPicker implements LocationPicker {
 			List<SignalStrength> lss = stock.get(key);
 			
 			double result = sa.evaluate(sample, lss);
-			
+//			System.out.println("Comp:\t"+key+"\t"+result);
 			if(best >= result) {
 				best = result;
 				bestKey = key;
 			}
 		}
+//		
+//		System.out.println("Picked sample "+bestKey);
 		
 		//fetch location name from database using bestKey
+		if(!dbc.isAlive())
+			dbc = new DatabaseConnection();
+		
 		String location = dbc.locationFromSample(bestKey);
 		
 		return location;
