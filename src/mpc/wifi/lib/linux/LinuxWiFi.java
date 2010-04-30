@@ -20,19 +20,16 @@ public class LinuxWiFi implements WiFiInfo{
 	 * Otherwise use "gksu".
 	 */
 	private static final String SU_PRIVILEGES = "gksu";
+	private static String wifi_interface = "wlan0";
+
+	private static String FETCH_AP_CMD = SU_PRIVILEGES+" iwlist "+wifi_interface+" scan >/dev/null && iwlist "+wifi_interface+" ap";
 	
-	private String wifi_interface = "wlan0";
 
 	public LinuxWiFi() {
 	}
-	
-	public LinuxWiFi(String wifi_interface) {
-		this.wifi_interface = wifi_interface;
-	}
-	
 
 	public List<SignalStrength> scan() throws IOException {
-		Process p = Runtime.getRuntime().exec(SU_PRIVILEGES +" "+ "iwlist "+ wifi_interface +" ap");
+		Process p = Runtime.getRuntime().exec(FETCH_AP_CMD);
 		
 		InputStream is = p.getInputStream();
 
@@ -44,7 +41,7 @@ public class LinuxWiFi implements WiFiInfo{
 		
 		byte[] b = bos.toByteArray();
 		
-//		System.out.println(new String(b, "UTF-8"));
+		System.out.println(new String(b, "UTF-8"));
 		
 		return parseScanData(new String(b,"UTF-8"));
 		
