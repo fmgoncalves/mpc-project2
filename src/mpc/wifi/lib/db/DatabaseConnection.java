@@ -80,8 +80,15 @@ public class DatabaseConnection {
 		String result = "";
 		try {
 			Statement stmt = conn.createStatement();
-			if (stmt.execute("SELECT loc FROM location WHERE id =" + id + ";"))
-				result = stmt.getResultSet().getString("loc");
+			String sql = "SELECT loc FROM location WHERE id =" + id + ";";
+			
+//			System.out.println(sql);
+			if (stmt.execute(sql)) {
+				ResultSet rs = stmt.getResultSet();
+				rs.next();
+				result = rs.getString("loc");
+				
+			}
 		} catch (SQLException e) {}
 		return result;
 	}

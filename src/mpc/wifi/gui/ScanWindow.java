@@ -78,7 +78,6 @@ public class ScanWindow extends JFrame {
 				
 				try {
 					results = wifinfo.scan();
-					
 					if(results.isEmpty()) {
 						JTextArea jta = new JTextArea("No results to display.\n"+
 						"Press \"Scan\" to obtain results");
@@ -127,7 +126,6 @@ public class ScanWindow extends JFrame {
 		add(southPanel, BorderLayout.SOUTH);
 		
 		pack();
-		
 		setVisible(true);
 	}
 	

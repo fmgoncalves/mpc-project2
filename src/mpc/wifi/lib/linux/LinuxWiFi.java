@@ -21,7 +21,7 @@ public class LinuxWiFi implements WiFiInfo{
 	 */
 	private static final String SU_PRIVILEGES = "gksu";
 	
-	private String wifi_interface = "ra0";
+	private String wifi_interface = "wlan0";
 
 	public LinuxWiFi() {
 	}
@@ -43,6 +43,8 @@ public class LinuxWiFi implements WiFiInfo{
 			bos.write(c);
 		
 		byte[] b = bos.toByteArray();
+		
+//		System.out.println(new String(b, "UTF-8"));
 		
 		return parseScanData(new String(b,"UTF-8"));
 		
