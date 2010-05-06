@@ -2,15 +2,22 @@ package mpc.wifi.gui;
 
 import java.awt.BorderLayout;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.UIManager;
 
+import mpc.wifi.lib.Pair;
+import mpc.wifi.lib.SignalStrength;
 import mpc.wifi.lib.WiFiInfo;
+import mpc.wifi.lib.analysis.AvgErrorAnalysis;
 import mpc.wifi.lib.analysis.BestSampleLocationPicker;
+import mpc.wifi.lib.analysis.EuclidianDistance;
 import mpc.wifi.lib.analysis.LocationPicker;
+import mpc.wifi.lib.analysis.ManhattanDistance;
 import mpc.wifi.lib.db.DatabaseConnection;
 import mpc.wifi.lib.db.DatabaseError;
 import mpc.wifi.lib.linux.LinuxWiFi;
@@ -20,7 +27,9 @@ public class LocateMe extends JFrame {
 	private static final long serialVersionUID = 1L;
 
 	private WiFiInfo wifinfo;
-	private LocationPicker lp;
+	private LocationPicker lp1;
+	private LocationPicker lp2;
+	private LocationPicker lp3;
 
 	private JPanel resultPanel;
 
@@ -28,7 +37,6 @@ public class LocateMe extends JFrame {
 		super("Locate Me");
 
 		wifinfo = new LinuxWiFi();
-		lp = new BestSampleLocationPicker(new DatabaseConnection());
 
 		resultPanel = new JPanel();
 
@@ -41,35 +49,69 @@ public class LocateMe extends JFrame {
 
 			@Override
 			public void run() {
-				while (true) {
-					try {
+				try {
+					DatabaseConnection dbc = new DatabaseConnection();
+					Map<Integer, Pair<String, List<SignalStrength>>> samples = dbc
+							.loadSamples();
+					lp1 = new BestSampleLocationPicker(new AvgErrorAnalysis(),
+							samples);
+					lp2 = new BestSampleLocationPicker(new ManhattanDistance(),
+							samples);
+					lp3 = new BestSampleLocationPicker(new EuclidianDistance(),
+							samples);
 
-						String location = lp.guessLocation(wifinfo.scan());
-						System.out.println("guessed " + location);
-						resultPanel.removeAll();
+					new Thread(new Runnable() {
 
-						JTextArea jta;
-						if (!location.isEmpty())
-							jta = new JTextArea("You are at: " + location);
-						else
-							jta = new JTextArea(
-									"Couldn't determine current location");
-						jta.setEditable(false);
-						resultPanel.add(jta);
+						@Override
+						public void run() {
+							while (true) {
+								try {
 
-						resultPanel.updateUI();
+									List<SignalStrength> scanList = wifinfo
+											.scan();
+									resultPanel.removeAll();
 
-					} catch (DatabaseError e1) {
-						e1.printStackTrace();
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
+									String location1 = lp1
+											.guessLocation(scanList);
+									String location2 = lp2
+											.guessLocation(scanList);
+									String location3 = lp3
+											.guessLocation(scanList);
 
-					try {
-						Thread.sleep(15000);
-					} catch (InterruptedException e) {
-						System.err.println(e.getLocalizedMessage());
-					}
+									System.out.println(location1+", "+location2+", "+location3);
+									
+									JTextArea jta = new JTextArea();
+
+									jta.append("AvgError\t\t" + location1);
+									jta.append("\n");
+									jta.append("Manhattan\t\t" + location2);
+									jta.append("\n");
+									jta.append("Euclidian\t\t" + location3);
+
+									jta.setEditable(false);
+									resultPanel.add(jta);
+									
+//									resultPanel.repaint();
+									resultPanel.updateUI();
+
+
+								} catch (DatabaseError e1) {
+									e1.printStackTrace();
+								} catch (IOException e1) {
+									e1.printStackTrace();
+								}
+
+								try {
+									Thread.sleep(5000);
+								} catch (InterruptedException e) {
+									System.err.println(e.getLocalizedMessage());
+								}
+							}
+						}
+					}).start();
+
+				} catch (DatabaseError e) {
+					System.err.println(e);
 				}
 			}
 		}).start();
@@ -80,7 +122,7 @@ public class LocateMe extends JFrame {
 
 		add(resultPanel, BorderLayout.CENTER);
 
-		setSize(200, 400);
+		setSize(500, 100);
 
 		setVisible(true);
 

@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import mpc.wifi.lib.Pair;
 import mpc.wifi.lib.SignalStrength;
 
 public class DatabaseConnection {
@@ -45,26 +46,25 @@ public class DatabaseConnection {
 		}
 	}
 
-	public Map<Integer, List<SignalStrength>> loadSamples()
+	public Map<Integer, Pair<String,List<SignalStrength>>> loadSamples()
 			throws DatabaseError {
 
-		Map<Integer, List<SignalStrength>> samples = new HashMap<Integer, List<SignalStrength>>();
+		Map<Integer, Pair<String,List<SignalStrength>>> samples = new HashMap<Integer, Pair<String,List<SignalStrength>>>();
 
 		try {
 
 			Statement stmt = conn.createStatement();
-			if (stmt.execute("SELECT DISTINCT(id) FROM samples;")) {
+			if (stmt.execute("SELECT DISTINCT(id), loc FROM samples NATURAL JOIN location;")) {
 				ResultSet rs = stmt.getResultSet();
 				while (rs.next())
-					samples.put(rs.getInt("id"),
-							new LinkedList<SignalStrength>());
+					samples.put(rs.getInt("id"), new Pair<String,List<SignalStrength>>(rs.getString("loc"),new LinkedList<SignalStrength>()));
 				if (stmt.execute("SELECT * FROM samples;")) {
 					rs = stmt.getResultSet();
 					while (rs.next()) {
 						String bssid = rs.getString("bssid");
 						int signal = rs.getInt("signal");
 						int id = rs.getInt("id");
-						samples.get(id).add(new SignalStrength(bssid, signal));
+						samples.get(id).getSecond().add(new SignalStrength(bssid, signal));
 					}
 				}
 			}
@@ -79,6 +79,7 @@ public class DatabaseConnection {
 	public String locationFromSample(int id) {
 		String result = "";
 		try {
+			conn.setAutoCommit(true);
 			Statement stmt = conn.createStatement();
 			String sql = "SELECT loc FROM location WHERE id =" + id + ";";
 			
@@ -87,8 +88,9 @@ public class DatabaseConnection {
 				ResultSet rs = stmt.getResultSet();
 				rs.next();
 				result = rs.getString("loc");
-				
 			}
+
+			conn.setAutoCommit(false);
 		} catch (SQLException e) {}
 		return result;
 	}

@@ -22,7 +22,7 @@ public class LinuxWiFi implements WiFiInfo{
 	private static final String SU_PRIVILEGES = "gksu";
 	private static String wifi_interface = "wlan0";
 
-	private static String FETCH_AP_CMD = SU_PRIVILEGES+" iwlist "+wifi_interface+" scan >/dev/null && iwlist "+wifi_interface+" ap";
+	private static String FETCH_AP_CMD = SU_PRIVILEGES+" iwlist "+wifi_interface+" ap";
 	
 
 	public LinuxWiFi() {
@@ -41,7 +41,8 @@ public class LinuxWiFi implements WiFiInfo{
 		
 		byte[] b = bos.toByteArray();
 		
-		System.out.println(new String(b, "UTF-8"));
+//		System.out.println(FETCH_AP_CMD);
+//		System.out.write(b);
 		
 		return parseScanData(new String(b,"UTF-8"));
 		
