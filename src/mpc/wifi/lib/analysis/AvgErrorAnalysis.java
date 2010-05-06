@@ -15,14 +15,18 @@ public class AvgErrorAnalysis implements SampleAnalyser {
 
 		int matches = 0;
 		double errorSum = 0;
-
+		
+//		System.out.println("Stage1: "+sample.size()+" "+other.size());
+		
 		for (SignalStrength ss0 : sample)
-			for (SignalStrength ss1 : other)
+			for (SignalStrength ss1 : other) {
 				if (ss0.getBssid().equals(ss1.getBssid())) {
 					matches++;
 					double relativeError = Math.abs(ss0.getSignal()-ss1.getSignal());
 					errorSum += relativeError;
 				}
+//				System.out.println(ss0.getBssid()+"\t"+ss1.getBssid());
+			}
 
 		int mismatches = sample.size() + other.size() - matches*2;
 		double avgError = matches > 0?  errorSum / matches : Double.POSITIVE_INFINITY;

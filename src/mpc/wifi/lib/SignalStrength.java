@@ -22,7 +22,8 @@ public class SignalStrength {
 	public boolean equals(Object obj) {
 		return obj instanceof SignalStrength ? ((SignalStrength) obj)
 				.getBssid().equals(bssid)
-				&& ((SignalStrength) obj).getSignal() == signal : false;
+//				&& ((SignalStrength) obj).getSignal() == signal 
+				: false;
 	}
 
 }
