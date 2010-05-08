@@ -15,6 +15,7 @@ public class BestSampleLocationPicker implements LocationPicker {
 	
 	private SampleAnalyser sa;
 	private DatabaseConnection dbc;
+	
 	/**
 	 * Stock samples from the database, to be loaded on the constructor.
 	 * Map is of (sample id, sample results).
@@ -22,7 +23,7 @@ public class BestSampleLocationPicker implements LocationPicker {
 	private Map<Integer,Pair<String,List<SignalStrength>>> stock;
 	
 	public BestSampleLocationPicker() {
-		this(new AvgErrorAnalysis());
+		this(new EuclidianDistance());
 	}
 
 	public BestSampleLocationPicker(SampleAnalyser sa){
@@ -43,6 +44,7 @@ public class BestSampleLocationPicker implements LocationPicker {
 
 	@Override
 	public String guessLocation(List<SignalStrength> sample) throws DatabaseError {
+		
 		double best = Double.MAX_VALUE;
 		
 		String location = "";
