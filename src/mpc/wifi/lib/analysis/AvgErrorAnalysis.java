@@ -7,31 +7,35 @@ import mpc.wifi.lib.SignalStrength;
 
 public class AvgErrorAnalysis implements SampleAnalyser {
 
-	//TODO test other values for this
-	private final double MISMATCH_PENALTY = 20;
-	
+	private static final int WEAK_SIGNAL = -100;
+
 	@Override
 	public double evaluate(List<SignalStrength> sample, List<SignalStrength> other) {
 
-		int matches = 0;
 		double errorSum = 0;
+		int n = 0;
 		
 //		System.out.println("Stage1: "+sample.size()+" "+other.size());
 		
 		for (SignalStrength ss0 : sample)
-			for (SignalStrength ss1 : other) {
-				if (ss0.getBssid().equals(ss1.getBssid())) {
-					matches++;
-					double relativeError = Math.abs(ss0.getSignal()-ss1.getSignal());
-					errorSum += relativeError;
-				}
-//				System.out.println(ss0.getBssid()+"\t"+ss1.getBssid());
+			if(other.contains(ss0)) {
+				n++;
+				SignalStrength ss1 =  other.get(other.indexOf(ss0));
+				errorSum += Math.abs(ss0.getSignal() - ss1.getSignal());
+			} else {//to account for signal present in sample but not in other
+				n++;
+				errorSum += Math.abs(ss0.getSignal() - WEAK_SIGNAL);
 			}
-
-		int mismatches = sample.size() + other.size() - matches*2;
-		double avgError = matches > 0?  errorSum / matches : Double.POSITIVE_INFINITY;
 		
-		return avgError + mismatches * MISMATCH_PENALTY;
+		//to account for the signals present in other but not in sample
+		for(SignalStrength ss1: other)
+			if(!sample.contains(ss1)) {
+				n++;
+				errorSum += Math.abs(ss1.getSignal() - WEAK_SIGNAL);
+			}
+		double avgError = n > 0?  errorSum / n : Double.POSITIVE_INFINITY;
+		
+		return avgError;
 	}
 	
 	public static void main(String[] args) {
